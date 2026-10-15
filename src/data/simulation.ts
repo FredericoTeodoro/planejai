@@ -1,3 +1,10 @@
+// Responsabilidade: centralizar a definição dos passos e dos dados do formulário.
+// Este arquivo atua como fonte de verdade para a sequência de perguntas da simulação:
+// cada etapa carrega texto, ícone, atributos do input e regras de UX do fluxo. Ele também
+// define o tipo do payload que será mantido em estado e salvo localmente.
+// O motivo de separar esses dados do componente visual é permitir que a lógica da simulação
+// seja lida em um único lugar, reduzindo duplicação e mantendo coerência entre o formulário,
+// o estado e a persistência.
 import {
   CalendarClock,
   CreditCard,
@@ -86,6 +93,9 @@ export const simulationFormSteps = [
   },
 ] satisfies FormStepProps[];
 
+// A estrutura final do payload segue a chave de cada etapa do formulário. Isso permite
+// acessar o estado em um objeto por id e usar propriedades computadas como
+// `formData[currentStep.id]` sem duplicar nomes manuais para cada etapa.
 export type SimulationFormData = Record<
   (typeof simulationFormSteps)[number]['id'],
   string

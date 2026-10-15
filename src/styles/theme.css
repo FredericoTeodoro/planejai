@@ -1,3 +1,10 @@
+/*
+  Responsabilidade: estabelecer os tokens de design do projeto para o tema claro e escuro.
+  Esses valores definem as variáveis CSS que alimentam classes utilitárias do Tailwind,
+  como `bg-background`, `text-foreground` e `border-border`. Separar esse conjunto em um
+  arquivo próprio permite que a aparência seja configurada em um único ponto e reaproveitada
+  por qualquer componente sem repetir cores ou definições no JSX.
+*/
 @layer base {
   :root,
   [data-theme='light'] {

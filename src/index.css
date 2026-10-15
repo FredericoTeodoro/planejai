@@ -1,3 +1,11 @@
+/*
+  Responsabilidade: definir a base visual global da aplicação e importar os tokens de tema.
+  Este arquivo atua como camada inicial de estilo: ele carrega as fontes do projeto,
+  incorpora o CSS do Tailwind e aplica o background e a cor de texto do documento.
+  A separação aqui é importante porque o fundo, a tipografia e os temas claros/escuros
+  são requisitos transversais a toda a interface e devem ser definidos antes dos
+  componentes específicos.
+*/
 @import 'tailwindcss';
 
 @import '@fontsource/inter/400.css';

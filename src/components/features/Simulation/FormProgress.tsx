@@ -1,3 +1,8 @@
+// Responsabilidade: indicar visualmente em que ponto do processo a simulação está.
+// A barra de progresso recebe o número da etapa atual e o total de etapas e transforma
+// isso em uma porcentagem que orienta o usuário sobre o restante do fluxo. Ela é um
+// componente de apoio: não coleta dados, mas facilita a compreensão da sequência e o estado
+// do formulário em tempo real.
 interface FormProgressProps {
   currentStep: number;
   totalSteps: number;

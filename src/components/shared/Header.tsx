@@ -1,3 +1,8 @@
+// Responsabilidade: fornecer a navegação principal e o controle de tema da interface.
+// O cabeçalho está acima do conteúdo da rota atual e atua como uma barra de ações global
+// para o usuário: ele pode abrir a tela inicial da simulação, acessar a rota de histórico
+// (cuja funcionalidade completa ainda será implementada) e alternar entre um tema claro
+// e um tema escuro sem depender de lógica repetida em cada página.
 import { Clock, Moon, Sun, TrendingUp, Wallet } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 

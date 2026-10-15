@@ -1,3 +1,8 @@
+// Responsabilidade: padronizar o comportamento visual dos botões do aplicativo.
+// Em vez de repetir classes e estados em cada botão, este componente centraliza a base
+// do estilo e muda a aparência por meio da prop `variant`. Isso facilita a manutenção
+// da interface e garante que ações como "Próximo", "Voltar" e alternar tema tenham a
+// mesma linguagem visual dentro do sistema.
 import type { LucideIcon } from 'lucide-react';
 import type { ButtonHTMLAttributes } from 'react';
 
@@ -15,9 +20,18 @@ const variantClasses = {
   ghost: 'rounded-lg text-foreground',
 };
 
-export function Button({  variant,  icon: Icon,  children,  className,  ...props}: ButtonProps) {
+export function Button({
+  variant,
+  icon: Icon,
+  children,
+  className,
+  ...props
+}: ButtonProps) {
   return (
-    <button {...props} className={[baseClasses, variantClasses[variant], className].join(' ')}>
+    <button
+      {...props}
+      className={[baseClasses, variantClasses[variant], className].join(' ')}
+    >
       {Icon && <Icon size={20} />}
       {children}
     </button>

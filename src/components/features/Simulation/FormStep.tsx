@@ -1,3 +1,8 @@
+// Responsabilidade: renderizar uma única pergunta do formulário e capturar a resposta do
+// usuário. Esse componente é a representação visual de uma etapa e também encapsula a
+// validação básica obrigatória do preenchimento antes de disparar o callback do pai.
+// Ele recebe o contexto da etapa a partir de `simulationFormSteps` e mantém uma entrada local
+// em estado para controlar o valor digitado antes de confirmar a resposta.
 import { ArrowLeft, ArrowRight, type LucideIcon } from 'lucide-react';
 import { type SyntheticEvent, useState } from 'react';
 
@@ -33,11 +38,19 @@ export function FormStep({
   onNext,
   hideBackButton,
 }: FormStepProps & ActionsButtonsProps) {
+  // `inputValue` mantém temporariamente, no estado local deste componente, o valor digitado.
+  // Enquanto o usuário preenche o campo, esse valor é atualizado pelo `onChange`.
+  // Ao enviar o formulário, `handleSubmit` passa a resposta para `onNext`, callback fornecido
+  // pelo componente pai. É o `SimulationForm` que incorpora o valor ao objeto `formData`,
+  // utilizado para reunir as respostas da simulação.
   const [inputValue, setInputValue] = useState('');
 
   const handleSubmit = (e: SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
 
+    // A validação atual apenas impede o envio quando `inputValue` está vazio.
+    // Ela não verifica se o conteúdo digitado é semanticamente válido para o campo,
+    // nem cobre todas as regras possíveis de negócio e de cada etapa do formulário.
     if (!inputValue) {
       return;
     }
@@ -60,7 +73,13 @@ export function FormStep({
         <Input
           {...inputProps}
           value={inputValue}
-          onChange={(e) => setInputValue(inputProps.prefix === 'R$' ? formatCurrencyInput(e.target.value) : e.target.value)}
+          onChange={(e) =>
+            setInputValue(
+              inputProps.prefix === 'R$'
+                ? formatCurrencyInput(e.target.value)
+                : e.target.value,
+            )
+          }
         />
         <div className="flex flex-col gap-3 sm:flex-row sm:gap-6">
           {!hideBackButton && (
