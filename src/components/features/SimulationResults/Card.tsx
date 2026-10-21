@@ -1,11 +1,14 @@
-import type { LucideIcon } from 'lucide-react'
+import type { LucideIcon } from 'lucide-react';
 
+// Responsabilidade: renderizar um bloco resumido de informação dentro do painel de resultados.
+// O componente é reutilizável em diferentes cartões: ele recebe o ícone, o texto principal e
+// um subtítulo, além de uma variação visual que permite destacar a métrica mais importante.
 interface CardProps {
-  icon: LucideIcon
-  label: string
-  value: string
-  subtitle: string
-  variant?: 'default' | 'primary'
+  icon: LucideIcon;
+  label: string;
+  value: string;
+  subtitle: string;
+  variant?: 'default' | 'primary';
 }
 
 const variantClasses = {
@@ -21,7 +24,7 @@ const variantClasses = {
     value: 'text-primary-foreground',
     subtitle: 'text-primary-foreground/70',
   },
-}
+};
 
 export function Card({
   icon: Icon,
@@ -30,7 +33,7 @@ export function Card({
   subtitle,
   variant = 'default',
 }: CardProps) {
-  const styles = variantClasses[variant]
+  const styles = variantClasses[variant];
 
   return (
     <div
@@ -53,9 +56,7 @@ export function Card({
       <p className={['text-3xl font-semibold', styles.value].join(' ')}>
         {value}
       </p>
-      <p className={['mt-1 text-sm', styles.subtitle].join(' ')}>
-        {subtitle}
-      </p>
+      <p className={['mt-1 text-sm', styles.subtitle].join(' ')}>{subtitle}</p>
     </div>
-  )
+  );
 }

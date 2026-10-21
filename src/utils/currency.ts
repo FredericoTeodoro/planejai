@@ -23,10 +23,13 @@ export function formatCurrencyInput(value: string | number): string {
   }).format(numericValue);
 }
 
+// Responsabilidade: transformar valores em moeda brasileira em um número numérico.
+// O formulário salva as entradas como strings formatadas, como "R$ 3.500,00" ou "5.000,00".
+// Antes de usarmos esses valores em cálculos, precisamos remover a máscara e converter a
+// vírgula em ponto para que o JavaScript consiga interpretar o valor corretamente.
 export function parseCurrency(value: string): number {
   return (
-    parseFloat(
-      value.replace(/\./g, '').replace(',', '.').replace('R$', ''),
-    ) || 0
-  )
+    parseFloat(value.replace(/\./g, '').replace(',', '.').replace('R$', '')) ||
+    0
+  );
 }

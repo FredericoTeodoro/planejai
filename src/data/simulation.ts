@@ -101,4 +101,7 @@ export type SimulationFormData = Record<
   string
 >;
 
-export type SimulationRecord = SimulationFormData & {id: string}
+// O tipo `SimulationRecord` amplia o payload do formulário com um identificador único.
+// Esse `id` é gerado no momento em que a simulação é salva e depois usado na rota de
+// resultado (`/resultado/:id`) para recuperar o mesmo registro em `localStorage`.
+export type SimulationRecord = SimulationFormData & { id: string };

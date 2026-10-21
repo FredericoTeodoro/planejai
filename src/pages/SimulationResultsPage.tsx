@@ -13,6 +13,10 @@ import { PageHero } from '@/components/shared/PageHero';
 import { useSimulationStorage } from '@/hooks/useSimulationStorage';
 import { calcMonthlySavings } from '@/utils/simulation';
 
+// Responsabilidade: buscar a simulação salva pelo identificador da rota e transformar
+// esses dados em um resumo visual. A rota recebe o `id` gerado no momento do cadastro,
+// então esse componente lê o registro em `localStorage` e, quando o dado existe,
+// calcula a economia mensal para preencher os cartões de resultado.
 export function SimulationResultsPage() {
   const { id } = useParams<{ id: string }>();
   const { getFormData } = useSimulationStorage();

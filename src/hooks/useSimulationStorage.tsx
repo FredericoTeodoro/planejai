@@ -11,6 +11,9 @@ import {
 const LOCAL_STORAGE_KEY = 'simulation-data';
 
 export const useSimulationStorage = () => {
+  // `saveFormData` recebe o payload final do formulário, cria um registro com identificador
+  // único e guarda esse conjunto em um array no `localStorage`. O retorno do `id` é usado
+  // pela navegação para direcionar o usuário para a tela específica da simulação.
   const saveFormData = (formData: SimulationFormData) => {
     const id = crypto.randomUUID();
     const record: SimulationRecord = { ...formData, id };
@@ -32,6 +35,8 @@ export const useSimulationStorage = () => {
     return id; // Retorna o ID gerado para o registro salvo, útil para redirecionamento ou referência futura.
   };
 
+  // `getFormData` é o complemento do fluxo de persistência: a página de resultado recebe o
+  // `id` da rota e busca no histórico o registro que corresponde a esse identificador.
   const getFormData = (id: string): SimulationRecord | null => {
     const storage = localStorage.getItem(LOCAL_STORAGE_KEY);
     if (!storage) {
