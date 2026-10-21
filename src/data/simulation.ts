@@ -100,3 +100,5 @@ export type SimulationFormData = Record<
   (typeof simulationFormSteps)[number]['id'],
   string
 >;
+
+export type SimulationRecord = SimulationFormData & {id: string}

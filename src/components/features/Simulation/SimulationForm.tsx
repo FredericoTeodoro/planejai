@@ -43,8 +43,8 @@ export const SimulationForm = () => {
     // Quando a última etapa é concluída, o dado é salvo e a navegação leva para a rota de
     // resultado. O `void` antes do `navigate` evita um aviso de Promise no callback.
     if (currentStepIndex + 1 > totalSteps - 1) {
-      saveFormData(updatedFormData);
-      void navigate('/resultado');
+      const id = saveFormData(updatedFormData);
+      void navigate(`/resultado/${id}`);
       return;
     }
 

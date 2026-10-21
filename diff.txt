@@ -1,0 +1,312 @@
+diff --git a/src/components/features/Simulation/SimulationForm.tsx b/src/components/features/Simulation/SimulationForm.tsx
+index 5536bb8..1ab55b1 100644
+--- a/src/components/features/Simulation/SimulationForm.tsx
++++ b/src/components/features/Simulation/SimulationForm.tsx
+@@ -43,8 +43,8 @@ export const SimulationForm = () => {
+     // Quando a última etapa é concluída, o dado é salvo e a navegação leva para a rota de
+     // resultado. O `void` antes do `navigate` evita um aviso de Promise no callback.
+     if (currentStepIndex + 1 > totalSteps - 1) {
+-      saveFormData(updatedFormData);
+-      void navigate('/resultado');
++      const id = saveFormData(updatedFormData);
++      void navigate(`/resultado/${id}`);
+       return;
+     }
+ 
+diff --git a/src/components/features/SimulationResults/Card.tsx b/src/components/features/SimulationResults/Card.tsx
+new file mode 100644
+index 0000000..f5da410
+--- /dev/null
++++ b/src/components/features/SimulationResults/Card.tsx
+@@ -0,0 +1,61 @@
++import type { LucideIcon } from 'lucide-react'
++
++interface CardProps {
++  icon: LucideIcon
++  label: string
++  value: string
++  subtitle: string
++  variant?: 'default' | 'primary'
++}
++
++const variantClasses = {
++  default: {
++    card: 'bg-card',
++    accent: 'text-primary',
++    value: 'text-foreground',
++    subtitle: 'text-muted-foreground',
++  },
++  primary: {
++    card: 'bg-primary',
++    accent: 'text-primary-foreground',
++    value: 'text-primary-foreground',
++    subtitle: 'text-primary-foreground/70',
++  },
++}
++
++export function Card({
++  icon: Icon,
++  label,
++  value,
++  subtitle,
++  variant = 'default',
++}: CardProps) {
++  const styles = variantClasses[variant]
++
++  return (
++    <div
++      className={[
++        'rounded-2xl p-6 shadow-[4px_4px_18px_0px_rgba(0,0,0,0.2)]',
++        styles.card,
++      ].join(' ')}
++    >
++      <div className="mb-3 flex items-center gap-2">
++        <Icon size={16} className={styles.accent} />
++        <span
++          className={[
++            'text-xs font-semibold tracking-widest uppercase',
++            styles.accent,
++          ].join(' ')}
++        >
++          {label}
++        </span>
++      </div>
++      <p className={['text-3xl font-semibold', styles.value].join(' ')}>
++        {value}
++      </p>
++      <p className={['mt-1 text-sm', styles.subtitle].join(' ')}>
++        {subtitle}
++      </p>
++    </div>
++  )
++}
+\ No newline at end of file
+diff --git a/src/components/shared/PageHero.tsx b/src/components/shared/PageHero.tsx
+new file mode 100644
+index 0000000..e9b1ad9
+--- /dev/null
++++ b/src/components/shared/PageHero.tsx
+@@ -0,0 +1,15 @@
++interface PageHeroProps {
++  title: string
++  subtitle: string
++}
++
++export function PageHero({ title, subtitle }: PageHeroProps) {
++  return (
++    <>
++      <h1 className="text-foreground mb-1 text-2xl font-semibold sm:text-3xl">
++        {title}
++      </h1>
++      <p className="text-muted-foreground mb-8 text-sm">{subtitle}</p>
++    </>
++  )
++}
+\ No newline at end of file
+diff --git a/src/data/simulation.ts b/src/data/simulation.ts
+index fbc7907..9802b7b 100644
+--- a/src/data/simulation.ts
++++ b/src/data/simulation.ts
+@@ -100,3 +100,5 @@ export type SimulationFormData = Record<
+   (typeof simulationFormSteps)[number]['id'],
+   string
+ >;
++
++export type SimulationRecord = SimulationFormData & {id: string}
+\ No newline at end of file
+diff --git a/src/hooks/useSimulationStorage.tsx b/src/hooks/useSimulationStorage.tsx
+index d3cb338..cdf0ab3 100644
+--- a/src/hooks/useSimulationStorage.tsx
++++ b/src/hooks/useSimulationStorage.tsx
+@@ -3,27 +3,44 @@
+ // dados permaneçam no navegador mesmo após recarregar a página. Em vez de espalhar
+ // `localStorage` diretamente nos componentes, esse hook centraliza a leitura e gravação
+ // e deixa a lógica de persistência reutilizável por qualquer parte do fluxo de simulação.
+-import { type SimulationFormData } from '@/data/simulation';
++import {
++  type SimulationFormData,
++  type SimulationRecord,
++} from '@/data/simulation';
+ 
+ const LOCAL_STORAGE_KEY = 'simulation-data';
+ 
+ export const useSimulationStorage = () => {
+   const saveFormData = (formData: SimulationFormData) => {
++    const id = crypto.randomUUID();
++    const record: SimulationRecord = { ...formData, id };
++
+     // O hook lê o histórico anterior da chave 'simulation-data'. Quando ela já existe,
+     // os dados são convertidos de JSON para um array em memória para preservar registros
+     // anteriores e acrescentar o novo formulário da simulação.
+     const storage = localStorage.getItem(LOCAL_STORAGE_KEY);
+     const savedData = storage
+-      ? (JSON.parse(storage) as SimulationFormData[])
++      ? (JSON.parse(storage) as SimulationRecord[])
+       : [];
+ 
+     // A estrutura salva é um array de objetos, onde cada item representa uma simulação
+     // concluída. Isso permite que diferentes execuções do formulário sejam acumuladas.
+     localStorage.setItem(
+       LOCAL_STORAGE_KEY,
+-      JSON.stringify([...savedData, formData]),
++      JSON.stringify([...savedData, record]),
+     );
++    return id; // Retorna o ID gerado para o registro salvo, útil para redirecionamento ou referência futura.
++  };
++
++  const getFormData = (id: string): SimulationRecord | null => {
++    const storage = localStorage.getItem(LOCAL_STORAGE_KEY);
++    if (!storage) {
++      return null;
++    }
++
++    const savedData = JSON.parse(storage) as SimulationRecord[];
++    return savedData.find((record) => record.id === id) || null;
+   };
+ 
+-  return { saveFormData };
++  return { saveFormData, getFormData };
+ };
+diff --git a/src/pages/SimulationResultsPage.tsx b/src/pages/SimulationResultsPage.tsx
+new file mode 100644
+index 0000000..ef2a682
+--- /dev/null
++++ b/src/pages/SimulationResultsPage.tsx
+@@ -0,0 +1,80 @@
++import {
++  CalendarClock,
++  CreditCardIcon,
++  Goal,
++  Landmark,
++  PiggyBank,
++  Wallet,
++} from 'lucide-react';
++import { useParams } from 'react-router-dom';
++
++import { Card } from '@/components/features/SimulationResults/Card';
++import { PageHero } from '@/components/shared/PageHero';
++import { useSimulationStorage } from '@/hooks/useSimulationStorage';
++import { calcMonthlySavings } from '@/utils/simulation';
++
++export function SimulationResultsPage() {
++  const { id } = useParams<{ id: string }>();
++  const { getFormData } = useSimulationStorage();
++  const data = id ? getFormData(id) : null;
++  const monthlySavings = calcMonthlySavings(data);
++
++  if (!data) {
++    return <p>Simulação não encontrada!</p>;
++  }
++
++  return (
++    <main className="mx-auto max-w-6xl px-4 py-10 sm:py-14">
++      <PageHero
++        title="Resultado da sua simulação"
++        subtitle="Com base no seu perfil financeiro e objetivos."
++      />
++      <div className="mb-6 grid grid-cols-1 gap-4 lg:grid-cols-3">
++        <Card
++          icon={Goal}
++          label="Custo da Meta"
++          value={data.goalAmount}
++          subtitle={data.goalName}
++        />
++        <Card
++          icon={CalendarClock}
++          label="Prazo"
++          value={`${data.goalDeadline} meses`}
++          subtitle="Prazo para atingir a meta"
++        />
++        <Card
++          variant="primary"
++          icon={PiggyBank}
++          label="Economia mensal"
++          value={`R$ ${monthlySavings.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
++          subtitle="Economia mensal necessária"
++        />
++      </div>
++      <div className="grid gap-6 lg:grid-cols-3">
++        <div className="order-2 rounded-2xl bg-card p-6 shadow-[4px_4px_18px_0px_rgba(0,0,0,0.2)] lg:order-1 lg:col-span-2">
++          Painel de Insights
++        </div>
++        <div className="order-1 flex flex-col gap-6 lg:order-2">
++          <Card
++            icon={Wallet}
++            label="Renda mensal"
++            value={data.income}
++            subtitle="Renda total bruta por mês"
++          />
++          <Card
++            icon={CreditCardIcon}
++            label="Custos Fixos de Vida"
++            value={data.expenses}
++            subtitle="Gastos essenciais por mês"
++          />
++          <Card
++            icon={Landmark}
++            label="Dívidas / Parcelas"
++            value={data.debts}
++            subtitle="Valor comprometido em parcelas/depósito"
++          />
++        </div>
++      </div>
++    </main>
++  );
++}
+diff --git a/src/router.tsx b/src/router.tsx
+index 41b98be..674c0f6 100644
+--- a/src/router.tsx
++++ b/src/router.tsx
+@@ -8,6 +8,7 @@ import { createBrowserRouter } from 'react-router-dom';
+ 
+ import { RootLayout } from './components/layout/RootLayout';
+ import { SimulationFormPage } from './pages/SimulationFormPage';
++import { SimulationResultsPage } from './pages/SimulationResultsPage';
+ 
+ export const router = createBrowserRouter([
+   {
+@@ -18,8 +19,8 @@ export const router = createBrowserRouter([
+         element: <SimulationFormPage />,
+       },
+       {
+-        path: '/resultado',
+-        element: <h1>Resultado da Simulação</h1>,
++        path: '/resultado/:id',
++        element: <SimulationResultsPage />,
+       },
+       {
+         path: '/historico',
+diff --git a/src/utils/currency.ts b/src/utils/currency.ts
+index 5263851..3840f1f 100644
+--- a/src/utils/currency.ts
++++ b/src/utils/currency.ts
+@@ -22,3 +22,11 @@ export function formatCurrencyInput(value: string | number): string {
+     maximumFractionDigits: 2,
+   }).format(numericValue);
+ }
++
++export function parseCurrency(value: string): number {
++  return (
++    parseFloat(
++      value.replace(/\./g, '').replace(',', '.').replace('R$', ''),
++    ) || 0
++  )
++}
+\ No newline at end of file
+diff --git a/src/utils/simulation.ts b/src/utils/simulation.ts
+new file mode 100644
+index 0000000..3d9e8c6
+--- /dev/null
++++ b/src/utils/simulation.ts
+@@ -0,0 +1,10 @@
++import type { SimulationFormData } from '../data/simulation'
++import { parseCurrency } from './currency'
++
++export function calcMonthlySavings(data: SimulationFormData) {
++  return (
++    parseCurrency(data.income) -
++    parseCurrency(data.expenses) -
++    parseCurrency(data.debts)
++  )
++}
+\ No newline at end of file

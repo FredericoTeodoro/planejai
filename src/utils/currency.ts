@@ -22,3 +22,11 @@ export function formatCurrencyInput(value: string | number): string {
     maximumFractionDigits: 2,
   }).format(numericValue);
 }
+
+export function parseCurrency(value: string): number {
+  return (
+    parseFloat(
+      value.replace(/\./g, '').replace(',', '.').replace('R$', ''),
+    ) || 0
+  )
+}
